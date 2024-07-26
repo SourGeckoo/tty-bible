@@ -39,10 +39,5 @@ cd tty-bible
 python bible.py
 ```
 
-If you made a virtual environment, run this before:
-```sh
-source venv/bin/activate
-```
-
 ## License
 This project is licensed under the MIT License.

@@ -6,7 +6,7 @@ import signal
 
 def load_bible_data():
     try:
-        return pd.read_csv('1_Projects/Command line/Bible search terminal app/web.csv', quotechar='"', skipinitialspace=True)
+        return pd.read_csv('1_Projects/Command line/tty-bible/web.csv', quotechar='"', skipinitialspace=True)
     except FileNotFoundError:
         return None
     except Exception as e:

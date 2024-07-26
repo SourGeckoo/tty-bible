@@ -12,7 +12,7 @@ A terminal-based Bible search application using Python and curses.
 
 1. Clone this repository:
     ```sh
-    git clone https://github.com/yourusername/tty-bible.git
+    git clone https://github.com/SourGeckoo/tty-bible.git
     ```
 2. Navigate into the directory:
     ```sh

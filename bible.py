@@ -103,17 +103,17 @@ Examples:
 - Verse range: Exodus 20:1-17
 - Entire chapter: Psalms 23
 
-Commands:
-- help: Show this help message
-- quit: Exit the program
-- color [1-7]: Change text color (1: White, 2: Red, 3: Green, 4: Yellow, 5: Blue, 6: Magenta, 7: Cyan)
-- info: Display app information
-
 Navigation:
 - Use Up and Down arrow keys to scroll through search results
 - Press Enter to return to the search prompt
 - Press 'c' to copy the displayed passage to clipboard
 - Press 'q' to quit the current view
+
+Commands:
+- help: Show this help message
+- quit: Exit the program
+- color [1-7]: Change text color (1: White, 2: Red, 3: Green, 4: Yellow, 5: Blue, 6: Magenta, 7: Cyan)
+- info: Display app information
 
 Note: Type 'help' anytime for usage information
     """

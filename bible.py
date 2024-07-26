@@ -1,13 +1,21 @@
-import curses
 import pandas as pd
 import textwrap
 import pyperclip
-import signal
+import sys
+import curses
+import os
 
 def load_bible_data():
+    # Get the directory of the current script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Construct the path to the CSV file
+    csv_path = os.path.join(script_dir, 'web.csv')
+    
     try:
-        return pd.read_csv('1_Projects/Command line/tty-bible/web.csv', quotechar='"', skipinitialspace=True)
+        return pd.read_csv(csv_path, quotechar='"', skipinitialspace=True)
     except FileNotFoundError:
+        print(f"Error: Bible data file not found at {csv_path}")
         return None
     except Exception as e:
         print(f"Error loading CSV: {str(e)}")
@@ -83,38 +91,6 @@ def draw_box(stdscr, h, w):
     stdscr.addstr(0, 2, "tty-bible")
     stdscr.addstr(h-1, 2, "Enter: search | 'help': usage info | 'c': copy | 'q': quit")
 
-def display_result(stdscr, result, text_color):
-    h, w = stdscr.getmaxyx()
-    wrapped_lines = []
-    for line in result.split('\n'):
-        wrapped_lines.extend(textwrap.wrap(line, w-4) or [''])
-
-    pad = curses.newpad(len(wrapped_lines) + h, w)
-    for i, line in enumerate(wrapped_lines):
-        pad.addstr(i, 0, line, curses.color_pair(text_color if result != show_help() else 1))
-
-    stdscr.clear()
-    draw_box(stdscr, h, w)
-    stdscr.refresh()
-
-    top_line = 0
-    while True:
-        pad.refresh(top_line, 0, 2, 2, h-3, w-3)
-        key = stdscr.getch()
-        if key == ord('\n'):
-            break
-        elif key == ord('q'):
-            return 'quit'
-        elif key == ord('c'):
-            pyperclip.copy(result)
-            stdscr.addstr(h-1, w-20, "Copied to clipboard")
-            stdscr.refresh()
-        elif key == curses.KEY_DOWN:
-            top_line = min(top_line + 1, len(wrapped_lines) - (h-4))
-        elif key == curses.KEY_UP:
-            top_line = max(top_line - 1, 0)
-    return None
-
 def show_help():
     return """
 tty-bible help:
@@ -130,7 +106,7 @@ Examples:
 Commands:
 - help: Show this help message
 - quit: Exit the program
-- color [0-6]: Change text color (0: White, 1: Red, 2: Green, 3: Yellow, 4: Blue, 5: Magenta, 6: Cyan)
+- color [1-7]: Change text color (1: White, 2: Red, 3: Green, 4: Yellow, 5: Blue, 6: Magenta, 7: Cyan)
 - info: Display app information
 
 Navigation:
@@ -158,20 +134,27 @@ Features:
 * Free and open-source
     """
 
-def resize_handler(signum, frame):
-    # This will force the application to redraw the screen on resize
-    curses.wrapper(main)
+def handle_resize(stdscr):
+    curses.update_lines_cols()
+    stdscr.clear()
+    stdscr.refresh()
+    h, w = stdscr.getmaxyx()
+    draw_box(stdscr, h, w)
+    stdscr.refresh()
 
 def main(stdscr):
-    # Set up signal handler for window resize
-    signal.signal(signal.SIGWINCH, resize_handler)
-    
     curses.curs_set(0)
     stdscr.keypad(True)
-    curses.start_color()
-    curses.use_default_colors()
-    for i in range(7):
-        curses.init_pair(i, i, -1)
+    
+    # Try to initialize colors, but have a fallback if it fails
+    try:
+        curses.start_color()
+        curses.use_default_colors()
+        for i in range(1, 8):  # Start from 1, as 0 is the default color
+            curses.init_pair(i, i, -1)
+        has_colors = True
+    except curses.error:
+        has_colors = False
     
     df = load_bible_data()
     if df is None:
@@ -179,7 +162,7 @@ def main(stdscr):
         stdscr.getch()
         return
 
-    text_color = 0  # Default: White
+    text_color = 1 if has_colors else 0  # Default: White (or default if colors not available)
 
     while True:
         stdscr.clear()
@@ -199,21 +182,65 @@ def main(stdscr):
         elif query == 'info':
             result = show_info()
         elif query.startswith('color '):
-            try:
-                color = int(query.split()[1])
-                if 0 <= color <= 6:
-                    text_color = color
-                    result = f"Text color changed to {['White', 'Red', 'Green', 'Yellow', 'Blue', 'Magenta', 'Cyan'][color]}"
-                else:
-                    result = "Invalid color. Choose a number between 0 and 6."
-            except (IndexError, ValueError):
-                result = "Invalid color command. Use 'color [0-6]'."
+            if has_colors:
+                try:
+                    color = int(query.split()[1])
+                    if 1 <= color <= 7:
+                        text_color = color
+                        result = f"Text color changed to {['White', 'Red', 'Green', 'Yellow', 'Blue', 'Magenta', 'Cyan'][color-1]}"
+                    else:
+                        result = "Invalid color. Choose a number between 1 and 7."
+                except (IndexError, ValueError):
+                    result = "Invalid color command. Use 'color [1-7]'."
+            else:
+                result = "Colors are not available on this terminal."
         else:
             result = search_bible(df, query)
 
-        action = display_result(stdscr, result, text_color)
+        action = display_result(stdscr, result, text_color, has_colors)
         if action == 'quit':
             break
+
+def display_result(stdscr, result, text_color, has_colors):
+    h, w = stdscr.getmaxyx()
+    wrapped_lines = []
+    for line in result.split('\n'):
+        wrapped_lines.extend(textwrap.wrap(line, w-4) or [''])
+
+    pad = curses.newpad(len(wrapped_lines) + h, w)
+    for i, line in enumerate(wrapped_lines):
+        if has_colors:
+            pad.addstr(i, 0, line, curses.color_pair(text_color if result != show_help() else 1))
+        else:
+            pad.addstr(i, 0, line)
+
+    stdscr.clear()
+    draw_box(stdscr, h, w)
+    stdscr.refresh()
+
+    top_line = 0
+    while True:
+        pad.refresh(top_line, 0, 2, 2, h-3, w-3)
+        key = stdscr.getch()
+        if key == ord('\n'):
+            break
+        elif key == ord('q'):
+            return 'quit'
+        elif key == ord('c'):
+            pyperclip.copy(result)
+            stdscr.addstr(h-1, w-20, "Copied to clipboard")
+            stdscr.refresh()
+        elif key == curses.KEY_DOWN:
+            top_line = min(top_line + 1, len(wrapped_lines) - (h-4))
+        elif key == curses.KEY_UP:
+            top_line = max(top_line - 1, 0)
+        elif key == curses.KEY_RESIZE:
+            handle_resize(stdscr)
+            h, w = stdscr.getmaxyx()
+            stdscr.clear()
+            draw_box(stdscr, h, w)
+            stdscr.refresh()
+    return None
 
 if __name__ == "__main__":
     curses.wrapper(main)

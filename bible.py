@@ -159,6 +159,7 @@ def main(stdscr):
     df = load_bible_data()
     if df is None:
         stdscr.addstr(0, 0, "Error: Bible data file not found or couldn't be read.")
+        stdscr.addstr(1, 0, "Press any key to exit...")
         stdscr.getch()
         return
 

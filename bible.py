@@ -126,6 +126,8 @@ Commands:
 - quit: Exit the program
 - color [0-6]: Change text color (0: White, 1: Red, 2: Green, 3: Yellow, 4: Blue, 5: Magenta, 6: Cyan)
 - info: Display app information
+- ot: Displays a list of all the books in the old testament
+- nt: Displays a lsit of all the books in the new testament
 
 Note: Type 'help' anytime for usage information
     """
@@ -145,6 +147,80 @@ Features:
 * Fast
 * Free and open-source
     """
+
+def show_old_testament():
+    return """
+Genesis
+Exodus
+Leviticus
+Numbers
+Deuteronomy
+Joshua
+Judges
+Ruth
+1 Samuel
+2 Samuel
+1 Kings
+2 Kings
+1 Chronicles
+2 Chronicles
+Ezra
+Nehemiah
+Esther
+Job
+Psalms
+Proverbs
+Ecclesiastes
+Song of Solomon
+Isaiah
+Jeremiah
+Lamentations
+Ezekiel
+Daniel
+Hosea
+Joel
+Amos
+Obadiah
+Jonah
+Micah
+Nahum
+Habakkuk
+Zephaniah
+Haggai
+Zechariah
+Malachi
+"""
+
+def show_new_testament():
+    return """
+Matthew
+Mark
+Luke
+John
+Acts
+Romans
+1 Corinthians
+2 Corinthians
+Galatians
+Ephesians
+Philippians
+Colossians
+1 Thessalonians
+2 Thessalonians
+1 Timothy
+2 Timothy
+Titus
+Philemon
+Hebrews
+James
+1 Peter
+2 Peter
+1 John
+2 John
+3 John
+Jude
+Revelation
+"""
 
 def main(stdscr):
     curses.curs_set(0)
@@ -186,6 +262,10 @@ def main(stdscr):
             result = show_help()
         elif query == 'info':
             result = show_info()
+        elif query == 'ot':
+            result = show_old_testament()
+        elif query == 'nt':
+            result = show_new_testament()
         elif query.startswith('color '):
             if has_colors:
                 try:

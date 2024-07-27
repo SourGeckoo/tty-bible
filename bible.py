@@ -87,9 +87,21 @@ def search_book(df, book):
         return f"{book}\n\n" + "\n\n".join(verses)
 
 def draw_box(stdscr, h, w):
-    stdscr.box()
-    stdscr.addstr(0, 2, "tty-bible")
-    stdscr.addstr(h-1, 2, "Enter: search | 'help': usage info | 'c': copy | 'q': quit")
+    stdscr.clear()
+    if h > 2 and w > 10:  # Ensure minimum size for drawing
+        stdscr.box()
+        if w > 10:
+            stdscr.addstr(0, 2, "tty-bible"[:w-4])
+        if h > 3 and w > 45:
+            stdscr.addstr(h-1, 2, "Enter: search | 'help': usage info | 'c': copy | 'q': quit"[:w-4])
+
+def handle_resize(stdscr):
+    curses.update_lines_cols()
+    h, w = stdscr.getmaxyx()
+    draw_box(stdscr, h, w)
+    if h > 4 and w > 35:  # Only draw prompt if there's enough space
+        stdscr.addstr(2, 2, "Enter search query or command:"[:w-4])
+    stdscr.refresh()
 
 def show_help():
     return """
@@ -133,14 +145,6 @@ Features:
 * Fast
 * Free and open-source
     """
-
-def handle_resize(stdscr):
-    curses.update_lines_cols()
-    stdscr.clear()
-    stdscr.refresh()
-    h, w = stdscr.getmaxyx()
-    draw_box(stdscr, h, w)
-    stdscr.refresh()
 
 def main(stdscr):
     curses.curs_set(0)

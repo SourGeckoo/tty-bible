@@ -112,7 +112,7 @@ Navigation:
 Commands:
 - help: Show this help message
 - quit: Exit the program
-- color [1-7]: Change text color (1: White, 2: Red, 3: Green, 4: Yellow, 5: Blue, 6: Magenta, 7: Cyan)
+- color [0-6]: Change text color (0: White, 1: Red, 2: Green, 3: Yellow, 4: Blue, 5: Magenta, 6: Cyan)
 - info: Display app information
 
 Note: Type 'help' anytime for usage information
@@ -150,7 +150,7 @@ def main(stdscr):
     try:
         curses.start_color()
         curses.use_default_colors()
-        for i in range(1, 8):  # Start from 1, as 0 is the default color
+        for i in range(0, 7):
             curses.init_pair(i, i, -1)
         has_colors = True
     except curses.error:
@@ -163,7 +163,7 @@ def main(stdscr):
         stdscr.getch()
         return
 
-    text_color = 1 if has_colors else 0  # Default: White (or default if colors not available)
+    text_color = 0 # white
 
     while True:
         stdscr.clear()
@@ -186,13 +186,13 @@ def main(stdscr):
             if has_colors:
                 try:
                     color = int(query.split()[1])
-                    if 1 <= color <= 7:
+                    if 0 <= color <= 6:
                         text_color = color
-                        result = f"Text color changed to {['White', 'Red', 'Green', 'Yellow', 'Blue', 'Magenta', 'Cyan'][color-1]}"
+                        result = f"Text color changed to {['White', 'Red', 'Green', 'Yellow', 'Blue', 'Magenta', 'Cyan'][color]}"
                     else:
-                        result = "Invalid color. Choose a number between 1 and 7."
+                        result = "Invalid color. Choose a number between 0 and 6."
                 except (IndexError, ValueError):
-                    result = "Invalid color command. Use 'color [1-7]'."
+                    result = "Invalid color command. Use 'color [0-6]'."
             else:
                 result = "Colors are not available on this terminal."
         else:

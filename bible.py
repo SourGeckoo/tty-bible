@@ -295,7 +295,7 @@ def display_result(stdscr, result, text_color, has_colors):
     pad = curses.newpad(len(wrapped_lines) + h, w)
     for i, line in enumerate(wrapped_lines):
         if has_colors:
-            pad.addstr(i, 0, line, curses.color_pair(text_color if result != show_help() else 1))
+            pad.addstr(i, 0, line, curses.color_pair(text_color if result != show_help() else 0))
         else:
             pad.addstr(i, 0, line)
 

@@ -39,5 +39,11 @@ cd tty-bible
 python bible.py
 ```
 
+If your virtual environment isn't activated automatically, run:
+
+```sh
+source venv/bin/activate # On Windows: venv\Scripts\activate
+```
+
 ## License
 This project is licensed under the MIT License.
